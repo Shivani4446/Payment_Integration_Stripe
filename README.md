@@ -28,6 +28,14 @@ PHP Scripts
 Database Configuration
   1.	Create a database named payment.
   2.	Run the following SQL to create the payments table:
+        CREATE TABLE payments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    payment_intent_id VARCHAR(255) NOT NULL,
+    amount_received INT NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    timestamp DATETIME NOT NULL
+);
+
 
 Set Up Webhooks
   1.	Log in to your Stripe Dashboard.
