@@ -1,0 +1,10 @@
+{
+    "name": "admin/project",
+    "description": "Payment project",
+    "type": "n",
+    "license": "n",
+    "minimum-stability": "stable",
+    "require": {
+        "stripe/stripe-php": "^15.5"
+    }
+}

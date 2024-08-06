@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Form</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Payment Form</h1>
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <form id="payment-form">
+                    <div class="form-group">
+                        <label for="card-element">Card Details</label>
+                        <div id="card-element" class="form-control"></div>
+                        <div id="card-errors" role="alert" class="text-danger mt-2"></div>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Pay</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var stripe = Stripe('pk_test_51PkeakEHBxWCsEiKF9NWYabyCzKYgG53D3KHShsoS6jk8FEvp79bTKRzJFyxvWJ2ekFIDe2nHiu9yfbAQxvM27tb00yzqPBN2h'); // Your Publishable Key
+        var elements = stripe.elements();
+
+        var card = elements.create('card', {
+            style: {
+                base: {
+                    fontSize: '16px',
+                    color: '#32325d',
+                    '::placeholder': {
+                        color: '#aab7c4'
+                    }
+                },
+                invalid: {
+                    color: '#fa755a',
+                    iconColor: '#fa755a'
+                }
+            }
+        });
+        card.mount('#card-element');
+
+        var form = document.getElementById('payment-form');
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            stripe.createPaymentMethod({
+                type: 'card',
+                card: card,
+            }).then(function(result) {
+                if (result.error) {
+                    // Show error in your UI
+                    var errorElement = document.getElementById('card-errors');
+                    errorElement.textContent = result.error.message;
+                } else {
+                    // Send the payment method ID to your server
+                    fetch('process_payment.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ payment_method_id: result.paymentMethod.id }),
+                    }).then(function(response) {
+                        return response.json();
+                    }).then(function(paymentIntent) {
+                        if (paymentIntent.error) {
+                            // Show error in your UI
+                            var errorElement = document.getElementById('card-errors');
+                            errorElement.textContent = paymentIntent.error;
+                        } else {
+                            // Payment successful
+                            alert('Payment Successful! ');
+                        }
+                    }).catch(function(error) {
+                        // Handle network or other errors
+                        var errorElement = document.getElementById('card-errors');
+                        errorElement.textContent = 'Network error: ' + error.message;
+                    });
+                }
+            }).catch(function(error) {
+                // Handle errors from Stripe.js
+                var errorElement = document.getElementById('card-errors');
+                errorElement.textContent = 'Stripe error: ' + error.message;
+            });
+        });
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
